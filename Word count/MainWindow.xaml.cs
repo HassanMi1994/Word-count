@@ -3,18 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Word_count
 {
@@ -28,8 +19,12 @@ namespace Word_count
             InitializeComponent();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private async void Button_Click(object sender, RoutedEventArgs e)
         {
+            txtEditor.Text = string.Empty;
+            Progress<double> progress = new Progress<double>();
+            progress.ProgressChanged += Progress_ProgressChanged;
+            Progress_ProgressChanged(this, 0);
             OpenFileDialog openFileDialog = new OpenFileDialog();
             string subtitle = "";
             if (openFileDialog.ShowDialog() == true)
@@ -41,9 +36,14 @@ namespace Word_count
 
             HashSet<string> vs = new HashSet<string>(result, StringComparer.OrdinalIgnoreCase);
 
-            PrintMostFrequentlyWordUsedInThisMovie(result);
+            await PrintMostFrequentlyWordUsedInThisMovie(result, progress);
 
             txtEditor.Text += $"in this season there is {result.Count()} word (include repeated), and {vs.Count} words not repeated";
+        }
+
+        private async void Progress_ProgressChanged(object sender, double e)
+        {
+            progressBar.Value = e;
         }
 
         private string[] ConvertToList(MatchCollection matchCollection)
@@ -56,18 +56,22 @@ namespace Word_count
             return vs.ToArray();
         }
 
-        private void PrintMostFrequentlyWordUsedInThisMovie(IEnumerable<string> list)
+        private async Task PrintMostFrequentlyWordUsedInThisMovie(IEnumerable<string> list, IProgress<double> progress)
         {
             txtEditor.Text = "most frequent word used in this movie sorted by used count:" + Environment.NewLine;
             var result = from x in list
                          group x by x.ToString().ToLower();
 
+            Dictionary<string, string> d = new Dictionary<string, string>();
+
             result = result.OrderByDescending(x => x.Count());
 
+            int count = 0;
             foreach (var item in result)
             {
-                txtEditor.Text += $"{item.Key,-20}is used {item.Count(),3} time(s){Environment.NewLine}";
+                txtEditor.Text += $"{item.Key,-20}is used {item.Count(),-3} time(s){Environment.NewLine}";
                 txtEditor.Text += $"_____________________________________________________________{Environment.NewLine}";
+                progress.Report(++count * 100 / result.Count());
             }
         }
     }

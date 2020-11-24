@@ -7,11 +7,10 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <Button Content="Chose a file" HorizontalAlignment="Left" Margin="25,32,0,0" VerticalAlignment="Top" Width="222" Click="Button_Click"/>
+        <Button Content="Chose a file" HorizontalAlignment="Left" Margin="25,10,0,0" VerticalAlignment="Top" Width="743" Click="Button_Click"/>
         <ScrollViewer Height="277" Width="744">
             <TextBlock x:Name="txtEditor" FontSize="16" />
         </ScrollViewer>
-
-
+        <ProgressBar x:Name="progressBar" HorizontalAlignment="Left" Height="31" Margin="24,35,0,0" VerticalAlignment="Top" Width="744"/>
     </Grid>
 </Window>
